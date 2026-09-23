@@ -9,6 +9,14 @@ export { parseChat, type ParseOptions } from './parser'
 export { analyzeChat, DEFAULT_SILENCE_THRESHOLD_MINUTES, type AnalyzeOptions } from './stats'
 export { toWrappedStats, type WrappedStatsOptions } from './wrapped-stats'
 export { DEFAULT_DATE_ORDER } from './detect-format'
+export {
+  checkFileSize,
+  decodeChatFile,
+  MAX_FILE_BYTES,
+  type IntakeError,
+  type IntakeErrorCode,
+  type IntakeResult,
+} from './intake'
 export { MIN_MESSAGES, type ParseError, type ParseErrorCode, type Result } from './errors'
 export type {
   ChatAnalysis,
