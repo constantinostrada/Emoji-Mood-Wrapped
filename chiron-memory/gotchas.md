@@ -25,3 +25,7 @@ What: The legacy untyped marker `<Multimedia omitido>` is classified as `other`,
 ## .webp counts as a sticker, not an image
 
 What: The extension `.webp` maps to `sticker` in media classification · Why: WhatsApp only uses that container for stickers, so counting it as a photo would inflate the image count of anyone with a sticker habit · Where: lib/media.ts
+
+## TextDecoder silently drops the BOM unless told not to
+
+What: `decodeChatFile` decodes with `new TextDecoder('utf-8', { ignoreBOM: true })`, which (despite the name) keeps the leading U+FEFF · Why: the default decoder strips it, so a `.txt` read in the browser no longer equals the same file read with `readFileSync(…, 'utf8')` in tests, and the zip-vs-txt parity test fails on one invisible character; stripping the BOM is `normalizeExport`'s job, not the intake's · Where: lib/intake.ts · Learned: `ignoreBOM: true` means "don't treat the BOM specially", i.e. keep it — the option name reads backwards

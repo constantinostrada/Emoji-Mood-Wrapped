@@ -9,3 +9,7 @@ What: `lib/` holds pure functions — normalize, header match, format detection,
 ## Emoji, laugh and word tallies mutate caller-owned accumulators
 
 What: `collectEmojis`, `collectLaughs` and `collectWords` take the target map or record as an argument and mutate it, rather than returning a fresh structure per message · Why: the statistics engine calls them once per message on chats of 50k messages, where per-message allocation is the difference between meeting and missing the two-second budget · Where: lib/stats.ts (`ingest`), lib/emoji.ts, lib/words.ts, lib/laughs.ts
+
+## The upload flow is one client state machine; only WrappedStats crosses to /wrapped, in React memory
+
+What: `app/_components/chat-flow.tsx` runs landing → upload → "¿Quién sos vos?" → loading as component state on `/`; the loading screen stores the chosen scope's `WrappedStats` in `WrappedSessionProvider` (React context in the root layout) and pushes `/wrapped`, which `router.replace('/')`s when the context is empty. `analyzeExport` runs at upload (errors and participants are needed there); the loading screen only calls the cheap `toWrappedStats` and holds for `MIN_LOADING_MS` · Why: the chat must never be persisted or sent anywhere, so no sessionStorage and no server round-trip — a reload losing the result is the intended behaviour, not a bug · Where: app/_components/chat-flow.tsx, app/_components/session.tsx, app/wrapped/page.tsx · Learned: when "lose it on reload" is a privacy requirement, keep state in React memory and make the dependent route redirect on empty rather than error

@@ -21,3 +21,7 @@ What: A header line whose body has no `Name: ` prefix is treated as a system not
 ## Errors are returned as typed values, never thrown
 
 What: `parseChat` returns `Result<ParseResult>` with `EMPTY_FILE`, `UNRECOGNIZED_FORMAT` or `TOO_FEW_MESSAGES`, each carrying user-facing Spanish copy; exceptions are reserved for caller bugs such as asking for a participant who is not in the chat · Why: every failure here is something a user did with their own file, and the upload screen needs to switch on the cause to show useful copy rather than a stack trace · Where: lib/errors.ts, lib/parser.ts
+
+## iOS zips are unpacked in the browser with fflate, inflating only .txt entries
+
+What: `decodeChatFile` recognises a zip by its `PK\x03\x04` magic number (not its name), and `unzipSync` runs with a `filter` that inflates only `.txt` entries (skipping `__MACOSX/` forks), preferring `_chat.txt`; the 20 MB limit applies to the upload and again to the unpacked chat · Why: iOS names the zip after the chat and, when exported with media, packs hundreds of MB of photos we must not inflate in a phone's memory; the file can never go to a server, so decompression has to be client-side · Where: lib/intake.ts · Learned: check a size budget both before reading and after decompressing — a small zip can expand past it

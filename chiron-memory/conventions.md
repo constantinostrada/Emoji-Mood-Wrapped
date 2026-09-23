@@ -13,3 +13,7 @@ What: `"test": "tsc --noEmit && vitest run"` · Why: the `WrappedStats` contract
 ## Underscore-prefixed bindings are exempt from no-unused-vars
 
 What: ESLint's `@typescript-eslint/no-unused-vars` is configured with `varsIgnorePattern: '^_'` · Why: type-level assertions are declared and deliberately never referenced, and they are the mechanism the WrappedStats contract test relies on · Where: eslint.config.mjs
+
+## UI copy is English and owned by the UI; lib/ copy is ignored and codes are switched on
+
+What: `app/_components/copy.ts` maps every `ParseErrorCode`, `IntakeErrorCode` and `WarningCode` to English copy (emoji, title, message, whether to open export help); the Spanish `title`/`message` that `lib/` returns are not rendered. The "¿Quién sos vos?" heading is the one deliberate Spanish line · Why: the product's specified strings ("Analyze my chat", the loading lines) are English, while `lib/` was written with Spanish copy; switching on codes keeps the engine untouched and the UI consistent · Where: app/_components/copy.ts
