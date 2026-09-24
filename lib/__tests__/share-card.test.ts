@@ -1,8 +1,10 @@
+import { BASE_STATS } from '../__fixtures__/sample-stats'
 import {
   fitText,
   formatDateRange,
   shareFileName,
   shareOrDownload,
+  toShareSummary,
   wrapLines,
   type MeasureText,
   type ShareEnvironment,
@@ -90,5 +92,20 @@ describe('shareOrDownload', () => {
     const { e, calls } = env({ share: () => Promise.reject(denied) })
     expect(await shareOrDownload(file, e)).toBe('downloaded')
     expect(calls.downloaded).toBe(1)
+  })
+})
+
+describe('toShareSummary', () => {
+  const stats = BASE_STATS
+  const summary = { title: 'T', emoji: '🦉', highlights: [{ label: 'Messages', value: '10' }], diagnosis: 'D' }
+
+  it('takes the final card summary, adds the period and pads to three stats', () => {
+    const share = toShareSummary(summary, stats)
+    expect(share.title).toBe('T')
+    expect(share.emoji).toBe('🦉')
+    expect(share.diagnosis).toBe('D')
+    expect(share.stats).toHaveLength(3)
+    expect(share.stats[0]).toEqual({ label: 'Messages', value: '10' })
+    expect(share.dateRange).toEqual({ from: stats.period.firstDay, to: stats.period.lastDay })
   })
 })

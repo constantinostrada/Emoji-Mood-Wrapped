@@ -48,7 +48,7 @@ export {
   SHARE_DISCLAIMER,
   shareFileName,
   shareOrDownload,
-  summaryFromStats,
+  toShareSummary,
   wrapLines,
   type MeasureText,
   type ShareEnvironment,
@@ -88,3 +88,5 @@ export function buildWrappedStats(
   if (!analysis.ok) return analysis
   return ok(toWrappedStats(analysis.value, participant, options))
 }
+
+export * from './humor'

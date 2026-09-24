@@ -3,11 +3,11 @@
 import { useRouter } from 'next/navigation'
 import { useCallback, useState } from 'react'
 
-import type { ChatAnalysis, WrappedStats } from '@/lib'
+import type { ChatAnalysis } from '@/lib'
 
 import { Landing } from './landing'
 import { LoadingScreen } from './loading-screen'
-import { useWrappedSession } from './session'
+import { useWrappedSession, type WrappedResult } from './session'
 import { UploadScreen } from './upload-screen'
 import { WhoScreen } from './who-screen'
 
@@ -19,11 +19,11 @@ type Step =
 
 /**
  * Landing → upload → "who are you?" → loading, all in component state on one
- * route. Only the final `WrappedStats` crosses to `/wrapped`, and only in memory.
+ * route. Only the final `WrappedStats` (and its narrative) crosses to `/wrapped`, and only in memory.
  */
 export function ChatFlow() {
   const [step, setStep] = useState<Step>({ name: 'landing', returning: false })
-  const { setStats } = useWrappedSession()
+  const { setWrapped } = useWrappedSession()
   const router = useRouter()
 
   const onAnalyzed = useCallback((analysis: ChatAnalysis) => {
@@ -36,11 +36,11 @@ export function ChatFlow() {
   }, [])
 
   const onDone = useCallback(
-    (stats: WrappedStats) => {
-      setStats(stats)
+    (wrapped: WrappedResult) => {
+      setWrapped(wrapped)
       router.push('/wrapped')
     },
-    [setStats, router],
+    [setWrapped, router],
   )
 
   switch (step.name) {

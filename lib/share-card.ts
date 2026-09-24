@@ -7,6 +7,7 @@
  * layout and share decisions stay testable in Node.
  */
 
+import type { WrappedSummary } from './humor/types'
 import type { WrappedStats } from './types'
 
 export interface ShareStat {
@@ -29,10 +30,10 @@ export interface ShareSummary {
 
 export const APP_NAME = 'Emoji Mood Wrapped'
 
-export const SHARE_DISCLAIMER =
-  'For entertainment only. Not a medical or psychological diagnosis. Your chat never left your device.'
+/** The same deliberate Spanish line every Wrapped card carries. */
+export const SHARE_DISCLAIMER = 'Solo entretenimiento. No es un análisis psicológico.'
 
-/** Stand-in until the Wrapped cards piece exposes its own summary. */
+/** Drives the dev-only /share-preview page. */
 export const SAMPLE_SUMMARY: ShareSummary = {
   title: 'Your Chaos Wrapped',
   emoji: '😂',
@@ -46,32 +47,27 @@ export const SAMPLE_SUMMARY: ShareSummary = {
 }
 
 /**
- * A naive summary built straight from `WrappedStats`, so /wrapped has
- * something real to share until the Wrapped cards piece lands with the proper
- * title and diagnosis.
+ * The share card's model from what the Wrapped's final card exposes
+ * (`WrappedSummary`) plus the period, which only `WrappedStats` knows.
+ * Missing highlights are filled from the stats so the card always has three.
  */
-export function summaryFromStats(stats: WrappedStats): ShareSummary {
-  const n = (value: number) => value.toLocaleString('en-US')
-  const laughRate = stats.messages.total === 0 ? 0 : stats.laughs.total / stats.messages.total
+export function toShareSummary(summary: WrappedSummary, stats: WrappedStats): ShareSummary {
+  const fallback: ShareStat[] = [
+    { value: stats.messages.total.toLocaleString('en-US'), label: 'Messages' },
+    { value: stats.laughs.total.toLocaleString('en-US'), label: 'Laughs' },
+    { value: stats.emojis.total.toLocaleString('en-US'), label: 'Emojis' },
+  ]
+  const stat = (i: number): ShareStat => {
+    const h = summary.highlights[i]
+    return h === undefined ? fallback[i] : { value: h.value, label: h.label }
+  }
   return {
-    title: stats.participant === null ? 'The Chat’s Wrapped' : `${stats.participant}’s Wrapped`,
-    emoji: stats.emojis.top[0]?.emoji ?? '🫥',
-    stats: [
-      { value: n(stats.messages.total), label: 'messages' },
-      { value: n(stats.laughs.total), label: 'laughs' },
-      { value: formatHour(stats.activity.busiestHour), label: 'peak hour' },
-    ],
-    diagnosis:
-      laughRate > 0.1
-        ? 'Terminal case of the giggles. Keep away from serious meetings.'
-        : 'Suspiciously composed. Possibly laughing on the inside.',
+    title: summary.title,
+    emoji: summary.emoji,
+    stats: [stat(0), stat(1), stat(2)],
+    diagnosis: summary.diagnosis,
     dateRange: { from: stats.period.firstDay, to: stats.period.lastDay },
   }
-}
-
-function formatHour(hour: number): string {
-  const h12 = hour % 12 === 0 ? 12 : hour % 12
-  return `${h12} ${hour < 12 ? 'AM' : 'PM'}`
 }
 
 /** "24 Sep 2025 – 23 Sep 2026"; the year is only repeated when it changes. */

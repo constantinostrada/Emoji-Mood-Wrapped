@@ -2,9 +2,9 @@
 
 A rule the codebase follows — naming, patterns, and where things live.
 
-## Tests live in lib/__tests__ and read fixtures through lib/__fixtures__/load.ts
+## Tests live in lib/__tests__ (and app/**/__tests__) and read fixtures through lib/__fixtures__
 
-What: Vitest specs are `lib/**/*.test.ts` (configured in `vitest.config.ts`); export fixtures are real anonymised `.txt` files under `lib/__fixtures__/`, reached only through the typed `loadFixture` helper · Why: the fixture names are a closed union, so a typo in a spec is a compile error rather than a runtime `ENOENT` · Where: lib/__fixtures__/load.ts, vitest.config.ts
+What: Vitest specs are `lib/**/*.test.ts` and `app/**/*.test.ts` (configured in `vitest.config.ts`, which also maps the `@/` alias); hand-built `WrappedStats` profiles come from `makeStats(overrides)` in `lib/__fixtures__/sample-stats.ts`; export fixtures are real anonymised `.txt` files under `lib/__fixtures__/`, reached only through the typed `loadFixture` helper · Why: the fixture names are a closed union, so a typo in a spec is a compile error rather than a runtime `ENOENT` · Where: lib/__fixtures__/load.ts, vitest.config.ts
 
 ## npm test typechecks before running the suite
 
@@ -16,7 +16,7 @@ What: ESLint's `@typescript-eslint/no-unused-vars` is configured with `varsIgnor
 
 ## UI copy is English and owned by the UI; lib/ copy is ignored and codes are switched on
 
-What: `app/_components/copy.ts` maps every `ParseErrorCode`, `IntakeErrorCode` and `WarningCode` to English copy (emoji, title, message, whether to open export help); the Spanish `title`/`message` that `lib/` returns are not rendered. The "¿Quién sos vos?" heading is the one deliberate Spanish line · Why: the product's specified strings ("Analyze my chat", the loading lines) are English, while `lib/` was written with Spanish copy; switching on codes keeps the engine untouched and the UI consistent · Where: app/_components/copy.ts
+What: `app/_components/copy.ts` maps every `ParseErrorCode`, `IntakeErrorCode` and `WarningCode` to English copy (emoji, title, message, whether to open export help); the Spanish `title`/`message` that `lib/` returns are not rendered. The deliberate Spanish lines are the "¿Quién sos vos?" heading, the per-card disclaimer "Solo entretenimiento. No es un análisis psicológico." and the "IA muy artificial" wink. The English jokes in `lib/humor/` are the one exception to "lib copy is ignored": they are the narrative the V2 LLM will replace, so they live with the narrator, not the UI · Why: the product's specified strings ("Analyze my chat", the loading lines) are English, while `lib/` was written with Spanish copy; switching on codes keeps the engine untouched and the UI consistent · Where: app/_components/copy.ts
 
 ## Share card assets are self-hosted under public/fonts and fetched whole
 

@@ -33,3 +33,11 @@ What: `renderShareCard` lays the 1080×1920 card out by hand on a canvas (text f
 ## The share PNG is generated when the panel mounts, not on tap
 
 What: `SharePanel` renders the card on mount (and on Retry); "Share" then calls `navigator.share` straight from the click, falling back to a download plus instructions when files cannot be shared or sharing errors for any reason other than AbortError · Why: Safari only allows `navigator.share` inside a fresh user gesture, and awaiting fonts and PNG encoding between tap and call spends it — the button would then silently do nothing · Where: app/_components/share/share-panel.tsx, lib/share-card.ts (`shareOrDownload`)
+
+## Template variants are picked by a hash of the whole WrappedStats, never by Math.random
+
+What: `seedOf(stats)` is FNV-1a over a key-sorted JSON of the stats; `pick(options, seed, slot)` hashes seed + a per-rule slot name. Each rule family has ≥3 variants; the rule (e.g. busiest hour 0–4 → `needs-sleep`) picks the family, the hash picks the line · Why: the same chat must always give the same Wrapped, yet two people with near-identical profiles should not read identical copy — any change in any count reshuffles the picks. Key-sorting makes two equal objects built in different key orders hash alike · Where: lib/humor/seed.ts, lib/humor/templates.ts · Learned: for "deterministic but varied" output, seed from the full input and salt per decision, so picks do not move in lockstep
+
+## The 3 AM metric is driven by the busiest hour band first, the night share second
+
+What: busiest hour 0–4 → 82–99%; 9–19 → capped at 29%; the twilight hours sit in 30–79% by distance to 3 AM. Zero messages → 0%, never NaN · Why: the acceptance bar ("01:00 → >80%, 14:00 → <30%") has to hold regardless of how flat the histogram is; a pure weighted formula over the night share could not guarantee both bounds · Where: lib/humor/metrics.ts (`awakeAt3amProbability`)

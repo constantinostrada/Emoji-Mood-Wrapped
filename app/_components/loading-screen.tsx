@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from 'react'
 
-import { toWrappedStats, type ChatAnalysis, type WrappedStats } from '@/lib'
+import { templateNarrator, toWrappedStats, type ChatAnalysis } from '@/lib'
 
 import { LOADING_LINES } from './copy'
 import { loadCardFonts } from './share/card-fonts'
+import type { WrappedResult } from './session'
 import { Screen, ScreenHeading, WarningsNote } from './ui'
 
 /** The real work takes milliseconds; the reveal deserves a drumroll. */
@@ -19,7 +20,7 @@ export function LoadingScreen({
 }: {
   analysis: ChatAnalysis
   participant: string | null
-  onDone: (stats: WrappedStats) => void
+  onDone: (wrapped: WrappedResult) => void
 }) {
   const [line, setLine] = useState(0)
 
@@ -37,11 +38,16 @@ export function LoadingScreen({
   useEffect(() => {
     let cancelled = false
     const minimum = new Promise((resolve) => setTimeout(resolve, MIN_LOADING_MS))
-    const work = new Promise<WrappedStats>((resolve) =>
-      setTimeout(() => resolve(toWrappedStats(analysis, participant)), 0),
+    // The narrator is async so the V2 LLM can replace the templates without
+    // this screen changing; the drumroll simply covers however long it takes.
+    const work = new Promise<WrappedResult>((resolve, reject) =>
+      setTimeout(() => {
+        const stats = toWrappedStats(analysis, participant)
+        templateNarrator.narrate(stats).then((narrative) => resolve({ stats, narrative }), reject)
+      }, 0),
     )
-    void Promise.all([work, minimum]).then(([stats]) => {
-      if (!cancelled) onDone(stats)
+    void Promise.all([work, minimum]).then(([wrapped]) => {
+      if (!cancelled) onDone(wrapped)
     })
     return () => {
       cancelled = true

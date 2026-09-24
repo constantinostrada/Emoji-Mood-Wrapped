@@ -90,14 +90,21 @@ export async function renderShareCard(input: ShareSummary): Promise<Blob> {
   summary.stats.forEach((stat, i) => {
     const x = MARGIN + i * (boxWidth + boxGap)
     roundRect(ctx, x, boxTop, boxWidth, boxHeight, 40, 'rgba(255,255,255,0.16)')
-    const value = fitText(stat.value, { maxWidth: boxWidth - 40, maxLines: 1, maxSize: 84, minSize: 40 }, measureWith(ctx, 800))
+    // Values range from "12,408" to "Main Character 🎬": up to two lines,
+    // centred on the same baseline area either way.
+    const value = fitText(stat.value, { maxWidth: boxWidth - 36, maxLines: 2, maxSize: 84, minSize: 34 }, measureWith(ctx, 800))
     ctx.fillStyle = WHITE
     ctx.font = textFont(800, value.size)
-    ctx.fillText(value.lines[0] ?? '', x + boxWidth / 2, boxTop + 128)
+    const valueLineHeight = value.size * 1.05
+    let vy = boxTop + 128 - (value.lines.length - 1) * valueLineHeight * 0.75
+    for (const line of value.lines) {
+      ctx.fillText(line, x + boxWidth / 2, vy)
+      vy += valueLineHeight
+    }
     const label = fitText(stat.label, { maxWidth: boxWidth - 40, maxLines: 1, maxSize: 36, minSize: 24 }, measureWith(ctx, 500))
     ctx.fillStyle = 'rgba(255,255,255,0.85)'
     ctx.font = textFont(500, label.size)
-    ctx.fillText(label.lines[0] ?? '', x + boxWidth / 2, boxTop + 185)
+    ctx.fillText(label.lines[0] ?? '', x + boxWidth / 2, boxTop + 200)
   })
 
   // Diagnosis panel.
