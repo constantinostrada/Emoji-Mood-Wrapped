@@ -71,3 +71,5 @@ export function buildWrappedStats(
   if (!analysis.ok) return analysis
   return ok(toWrappedStats(analysis.value, participant, options))
 }
+
+export * from './humor'
