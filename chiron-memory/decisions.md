@@ -25,3 +25,11 @@ What: `parseChat` returns `Result<ParseResult>` with `EMPTY_FILE`, `UNRECOGNIZED
 ## iOS zips are unpacked in the browser with fflate, inflating only .txt entries
 
 What: `decodeChatFile` recognises a zip by its `PK\x03\x04` magic number (not its name), and `unzipSync` runs with a `filter` that inflates only `.txt` entries (skipping `__MACOSX/` forks), preferring `_chat.txt`; the 20 MB limit applies to the upload and again to the unpacked chat · Why: iOS names the zip after the chat and, when exported with media, packs hundreds of MB of photos we must not inflate in a phone's memory; the file can never go to a server, so decompression has to be client-side · Where: lib/intake.ts · Learned: check a size budget both before reading and after decompressing — a small zip can expand past it
+
+## Template variants are picked by a hash of the whole WrappedStats, never by Math.random
+
+What: `seedOf(stats)` is FNV-1a over a key-sorted JSON of the stats; `pick(options, seed, slot)` hashes seed + a per-rule slot name. Each rule family has ≥3 variants; the rule (e.g. busiest hour 0–4 → `needs-sleep`) picks the family, the hash picks the line · Why: the same chat must always give the same Wrapped, yet two people with near-identical profiles should not read identical copy — any change in any count reshuffles the picks. Key-sorting makes two equal objects built in different key orders hash alike · Where: lib/humor/seed.ts, lib/humor/templates.ts · Learned: for "deterministic but varied" output, seed from the full input and salt per decision, so picks do not move in lockstep
+
+## The 3 AM metric is driven by the busiest hour band first, the night share second
+
+What: busiest hour 0–4 → 82–99%; 9–19 → capped at 29%; the twilight hours sit in 30–79% by distance to 3 AM. Zero messages → 0%, never NaN · Why: the acceptance bar ("01:00 → >80%, 14:00 → <30%") has to hold regardless of how flat the histogram is; a pure weighted formula over the night share could not guarantee both bounds · Where: lib/humor/metrics.ts (`awakeAt3amProbability`)
