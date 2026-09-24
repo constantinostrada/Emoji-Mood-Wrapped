@@ -25,3 +25,11 @@ What: `parseChat` returns `Result<ParseResult>` with `EMPTY_FILE`, `UNRECOGNIZED
 ## iOS zips are unpacked in the browser with fflate, inflating only .txt entries
 
 What: `decodeChatFile` recognises a zip by its `PK\x03\x04` magic number (not its name), and `unzipSync` runs with a `filter` that inflates only `.txt` entries (skipping `__MACOSX/` forks), preferring `_chat.txt`; the 20 MB limit applies to the upload and again to the unpacked chat · Why: iOS names the zip after the chat and, when exported with media, packs hundreds of MB of photos we must not inflate in a phone's memory; the file can never go to a server, so decompression has to be client-side · Where: lib/intake.ts · Learned: check a size budget both before reading and after decompressing — a small zip can expand past it
+
+## The share card is drawn with Canvas 2D, not rasterised from the DOM
+
+What: `renderShareCard` lays the 1080×1920 card out by hand on a canvas (text fitted with `fitText`, emoji via the PUA Twemoji font) and encodes it with `canvas.toBlob('image/png')`; no html2canvas or similar · Why: DOM rasterisers inherit every OS difference the card must avoid (system emoji, late web fonts, CSS support) and add a dependency, while a hand layout is deterministic, fast (~270 ms desktop) and never leaves the browser · Where: app/_components/share/render-card.ts, lib/share-card.ts · Learned: for an image that must look identical everywhere, own every pixel rather than screenshotting a layout the browser controls
+
+## The share PNG is generated when the panel mounts, not on tap
+
+What: `SharePanel` renders the card on mount (and on Retry); "Share" then calls `navigator.share` straight from the click, falling back to a download plus instructions when files cannot be shared or sharing errors for any reason other than AbortError · Why: Safari only allows `navigator.share` inside a fresh user gesture, and awaiting fonts and PNG encoding between tap and call spends it — the button would then silently do nothing · Where: app/_components/share/share-panel.tsx, lib/share-card.ts (`shareOrDownload`)

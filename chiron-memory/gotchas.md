@@ -29,3 +29,11 @@ What: The extension `.webp` maps to `sticker` in media classification · Why: Wh
 ## TextDecoder silently drops the BOM unless told not to
 
 What: `decodeChatFile` decodes with `new TextDecoder('utf-8', { ignoreBOM: true })`, which (despite the name) keeps the leading U+FEFF · Why: the default decoder strips it, so a `.txt` read in the browser no longer equals the same file read with `readFileSync(…, 'utf8')` in tests, and the zip-vs-txt parity test fails on one invisible character; stripping the BOM is `normalizeExport`'s job, not the intake's · Where: lib/intake.ts · Learned: `ignoreBOM: true` means "don't treat the BOM specially", i.e. keep it — the option name reads backwards
+
+## Chrome splits emoji ZWJ sequences that contain VS16 before the font can ligate them
+
+What: With a self-hosted Twemoji COLR font, Chrome (canvas and DOM alike) draws 🤦🏽‍♀️, 🏳️‍🌈 and ❤️‍🔥 as two emoji, while HarfBuzz alone shapes them into one glyph from the same font; adding a cmap format 14 table or stripping U+FE0F does not help. The share card sidesteps shaping: `scripts/build-emoji-font.py` gives every color glyph its own Supplementary PUA code point (U+F0000+N, list in `public/fonts/twemoji-pua-*.txt`) and `toEmojiGlyphs` maps sequences onto them by longest match before drawing · Why: the card must show the same emoji on Android, iOS and desktop, and a split sequence is exactly the "broken image" that kills the share · Where: lib/emoji-glyphs.ts, scripts/build-emoji-font.py, app/_components/share/card-fonts.ts · Learned: when the browser's text shaping is the unreliable layer, address glyphs directly instead of feeding it better input
+
+## Background tabs make canvas.toBlob look 30× slower
+
+What: Encoding the 1080×1920 card PNG measured ~1.1 s in a Chrome tab whose `document.visibilityState` was `hidden`, and ~35 ms once the tab was in front · Why: Chrome throttles hidden tabs, so an automated browser check of the "< 2 s" budget reads a false failure · Where: app/_components/share/share-panel.tsx (`data-generation-ms`) · Learned: check `document.visibilityState` before trusting any timing taken through browser automation

@@ -17,3 +17,7 @@ What: ESLint's `@typescript-eslint/no-unused-vars` is configured with `varsIgnor
 ## UI copy is English and owned by the UI; lib/ copy is ignored and codes are switched on
 
 What: `app/_components/copy.ts` maps every `ParseErrorCode`, `IntakeErrorCode` and `WarningCode` to English copy (emoji, title, message, whether to open export help); the Spanish `title`/`message` that `lib/` returns are not rendered. The "¿Quién sos vos?" heading is the one deliberate Spanish line · Why: the product's specified strings ("Analyze my chat", the loading lines) are English, while `lib/` was written with Spanish copy; switching on codes keeps the engine untouched and the UI consistent · Where: app/_components/copy.ts
+
+## Share card assets are self-hosted under public/fonts and fetched whole
+
+What: fonts and the emoji index live in `public/fonts/` and are loaded through the FontFace API by `loadCardFonts`, which the loading screen warms early; nothing is requested per emoji or with Wrapped data in the URL · Why: a per-emoji image URL would tell the server which emoji the chat's top one is, and a CDN font could arrive late and leave the card in a fallback font · Where: app/_components/share/card-fonts.ts, public/fonts/README.md
