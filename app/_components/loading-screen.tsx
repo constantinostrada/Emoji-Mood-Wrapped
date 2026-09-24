@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { toWrappedStats, type ChatAnalysis, type WrappedStats } from '@/lib'
 
 import { LOADING_LINES } from './copy'
+import { loadCardFonts } from './share/card-fonts'
 import { Screen, ScreenHeading, WarningsNote } from './ui'
 
 /** The real work takes milliseconds; the reveal deserves a drumroll. */
@@ -25,6 +26,12 @@ export function LoadingScreen({
   useEffect(() => {
     const id = setInterval(() => setLine((n) => (n + 1) % LOADING_LINES.length), LINE_INTERVAL_MS)
     return () => clearInterval(id)
+  }, [])
+
+  // Warm the share card's fonts during the drumroll, so the card is ready the
+  // moment the Wrapped appears. A failure here is retried when the card renders.
+  useEffect(() => {
+    loadCardFonts().catch(() => {})
   }, [])
 
   useEffect(() => {

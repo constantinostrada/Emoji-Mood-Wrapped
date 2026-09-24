@@ -1,6 +1,11 @@
-import Link from 'next/link'
+'use client'
 
-import type { WrappedStats } from '@/lib'
+import Link from 'next/link'
+import { useMemo } from 'react'
+
+import { summaryFromStats, type WrappedStats } from '@/lib'
+
+import { SharePanel } from '../_components/share/share-panel'
 
 /**
  * Placeholder for the Wrapped cards, which are their own piece of work. It only
@@ -9,6 +14,8 @@ import type { WrappedStats } from '@/lib'
 export function WrappedScreen({ stats }: { stats: WrappedStats }) {
   const who = stats.participant ?? 'The whole chat'
   const topEmoji = stats.emojis.top[0]?.emoji ?? '🫥'
+  // Until the Wrapped cards expose their own final-card summary.
+  const summary = useMemo(() => summaryFromStats(stats), [stats])
 
   return (
     <main
@@ -24,6 +31,7 @@ export function WrappedScreen({ stats }: { stats: WrappedStats }) {
         <Stat label="Laughs" value={stats.laughs.total} />
         <Stat label="Longest streak (days)" value={stats.streak.longestDays} />
       </dl>
+      <SharePanel summary={summary} />
       <Link
         href="/"
         className="rounded-full border border-white/30 px-6 py-3 text-center font-semibold focus-visible:outline-4 focus-visible:outline-offset-2 focus-visible:outline-yellow-300"

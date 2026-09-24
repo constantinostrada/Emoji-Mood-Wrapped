@@ -39,6 +39,23 @@ export type {
   WordCount,
   WrappedStats,
 } from './types'
+export { parseEmojiIndex, toEmojiGlyphs, type EmojiIndex } from './emoji-glyphs'
+export {
+  APP_NAME,
+  fitText,
+  formatDateRange,
+  SAMPLE_SUMMARY,
+  SHARE_DISCLAIMER,
+  shareFileName,
+  shareOrDownload,
+  summaryFromStats,
+  wrapLines,
+  type MeasureText,
+  type ShareEnvironment,
+  type ShareOutcome,
+  type ShareStat,
+  type ShareSummary,
+} from './share-card'
 
 import { err, ok, type Result } from './errors'
 import { parseChat, type ParseOptions } from './parser'
